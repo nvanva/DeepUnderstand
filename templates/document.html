@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Ngram weights for document</title>
+      <style>
+          li {
+              margin: 1em 0;
+          }
+      </style>
+
+  </head>
+  <body>
+  <h1>Document from dev set</h1>
+    {% if dataframe %}
+        {{ document_text | safe }}
+    {% else %}
+        <p> {{ document_text }} </p>
+    {% endif %}
+    <br>
+  {% if oneclass %}
+    <h1>{{ top }}</h1>
+  {% else %}
+    <h1>Ngram weights</h1>
+  {% endif %}
+    <div style="float: right; width: 90%;">
+        <img src="data:image/png;base64, {{ bar_url }}">
+    </div>
+    <br>
+    <div style="float: left; width: 10%;">
+        {% for ngram in ngrams %}
+            <li><a href="{{ ngram.url }}">{{ ngram.name }}</a></li>
+        {% endfor %}
+    </div>
+  </body>
+</html>

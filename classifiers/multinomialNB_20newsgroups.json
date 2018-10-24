@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "module": "TfidfMultinomialNB",
+  "class": "VeClf",
+  "boardname": "MultinomialNB",
+  "dataset": "20newsgroups",
+  "trainset": "train",
+  "params": {
+              "alpha": 0.01
+            },
+  "description": "Baseline for gikrya dataset"
+}

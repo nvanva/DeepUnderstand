@@ -1,0 +1,4 @@
+{
+  "module": "evalAllClassifiers",
+  "eval_function": "score_df"
+}

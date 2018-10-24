@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Classifiers competition</title>
+
+  </head>
+  <body>
+    <h1> Leaderboard </h1>
+
+    {% for leader_board, plot_url, dataset_name in leader_boards %}
+    <h2> {{ dataset_name }} </h2>
+    {{ leader_board | safe }}
+    <img src="data:image/png;base64, {{ plot_url }}">
+    {% endfor %}
+
+
+
+  </body>
+</html>

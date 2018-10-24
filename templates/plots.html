@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Classifier analyzer</title>
+  </head>
+  <body>
+    <h1> Analysis for {{ classifier }} classifier:</h1>
+    <h2> Dev scores: </h2>
+    <p> {{ test_scores | safe }}</p>
+    <h5> Classification report </h5>
+    <p> {{ classification_report_test | safe }}</p>
+    <br>
+    <h2> Train scores: </h2>
+    <p> {{ train_scores | safe }}</p>
+    <h5> Classification report </h5>
+    <p> {{ classification_report_train | safe }}</p>
+    <br>
+    <h2> Feature analysis by class: </h2>
+    {% for cat in allcats %}
+        <li><a href="{{ cat.url }}">{{ cat.name }}</a></li>
+    {% endfor %}
+    <br>
+    <h1><a href="{{ clf.url }}" type="button">{{ clf.name }}</a></h1>
+    <br>
+    <h1> Confusion matrix for dev set</h1>
+    <img src="data:image/png;base64, {{ hm_url }}">
+  </body>
+</html>

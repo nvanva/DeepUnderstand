@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "module": "nbsvm",
+  "class": "NBSVM_Seq",
+  "boardname": "NBSVM",
+  "dataset": "gikrya_Variant",
+  "trainset": "train",
+  "params": {
+              "ngram_range": [1,5],
+              "fit_scaler": null,
+              "transform_scaler": "bin",
+              "C": 10.0
+            },
+  "description": "NBSVM for Variant on Gikrya dataset"
+}

@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "module": "nbsvm",
+  "class": "NBSVM_Seq",
+  "boardname": "NBSVM",
+  "dataset": "gikrya_Degree",
+  "trainset": "train",
+  "params": {
+              "ngram_range": [1,5],
+              "fit_scaler": null,
+              "transform_scaler": null,
+              "C": 0.02
+            },
+  "description": "NBSVM for Degree on Gikrya dataset"
+}

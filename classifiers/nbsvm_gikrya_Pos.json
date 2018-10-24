@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "module": "nbsvm",
+  "class": "NBSVM_Seq",
+  "boardname": "NBSVM",
+  "dataset": "gikrya_Pos",
+  "trainset": "train",
+  "params": {
+              "ngram_range": [1,5],
+              "fit_scaler": "minmax",
+              "transform_scaler": null,
+              "C": 0.06
+            },
+  "description": "NBSVM for Pos on Gikrya dataset"
+}

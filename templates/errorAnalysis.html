@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Error analysis</title>
+
+    {{ js_resources|indent(4)|safe }}
+
+    {{ css_resources|indent(4)|safe }}
+
+    {{ plot_script|indent(4)|safe }}
+
+  </head>
+  <body>
+  <h1>Error analysis on {{ traintest }} set</h1>
+    <p> Select classes to plot: </p>
+    <form name="clf_button" method='GET'>
+        Set:
+        <select name="set">
+            {% if traintest == 'dev' %}
+                <option selected>dev</option>
+                <option>train</option>
+            {% else %}
+                <option>dev</option>
+                <option selected>train</option>
+            {% endif %}
+        </select>
+        <br>
+        1st class to plot:
+        <select name="1st_class">
+            {% for item in allcats %}
+                {% if item == chosen_1class %}
+                    <option selected>{{ item }}</option>
+                {% else %}
+                    <option>{{ item }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+
+        2nd class to plot:
+        <select name="2nd_class">
+            {% for item in allcats %}
+                {% if item == chosen_2class %}
+                    <option selected>{{ item }}</option>
+                {% else %}
+                    <option>{{ item }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <br>
+
+
+        <button type="submit">Submit</button>
+    </form>
+    <h3>{{ valid_text }}</h3>
+    {{ plot_div|indent(4)|safe }}
+  </body>
+</html>

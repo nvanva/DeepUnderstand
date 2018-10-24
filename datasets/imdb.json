@@ -1,0 +1,10 @@
+{
+  "module": "imdb",
+  "load_function": "load_data",
+  "boardname": "IMDB dataset",
+  "evaluation_file": "gikrya_eval.json",
+  "params": {
+
+            },
+  "description": "Dataset with movie reviews from IMDB"
+}

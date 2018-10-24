@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "module": "TfidfMultinomialNB",
+  "class": "VeClf",
+  "boardname": "MultinomialNB-Unigram-mindf50",
+  "dataset": "imdb",
+  "trainset": "train",
+  "params": {
+              "alpha": 0.01,
+              "ngram_range": [1,1],
+              "min_df": 50
+            },
+  "description": "Baseline for gikrya dataset"
+}

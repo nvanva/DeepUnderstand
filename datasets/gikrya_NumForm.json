@@ -1,0 +1,11 @@
+{
+  "module": "gikrya_mod",
+  "load_function": "pos_sentences_mod",
+  "boardname": "NumForm gikrya",
+  "evaluation_file": "gikrya_eval.json",
+  "params": {
+              "limit": null, "only_evaluated": false,
+              "attr": "NumForm", "window": [2,2]
+            },
+  "description": "Gikrya dataset, NumForm attr"
+}

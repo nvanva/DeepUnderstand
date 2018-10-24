@@ -1,0 +1,11 @@
+{
+  "module": "20newsgroups",
+  "load_function": "fetch_20newsgroups_mod",
+  "boardname": "20 Newsgroups with 4 classes",
+  "evaluation_file": "gikrya_eval.json",
+  "params": {
+              "remove": ["headers", "footers", "quotes"],
+              "categories": ["alt.atheism", "comp.graphics", "comp.os.ms-windows.misc", "comp.sys.ibm.pc.hardware"]
+            },
+  "description": "20 Newsgroups dataset with 4 classes"
+}
