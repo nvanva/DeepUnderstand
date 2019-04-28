@@ -11,6 +11,7 @@ from bokeh.embed import components
 from bokeh.models.callbacks import CustomJS
 import numpy as np
 import os
+import argparse
 
 app = Flask(__name__)
 
@@ -135,5 +136,12 @@ def create_graph_page(output):
     html = flask.render_template('plots.html', layout_script=script, layout_div=div, set=output)
     return html
 
+
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument('-h', '--host', default='127.0.0.1')
+parser.add_argument('-p', '--port', type=int, default=5000)
+parser.add_argument('-d', '--debug', action="store_true")
+args = parser.parse_args()
+
 if __name__ == "__main__":
-    app.run()
+    app.run(host=args.host, port=args.port, debug=args.debug)
