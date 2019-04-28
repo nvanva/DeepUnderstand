@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select dataset</title>
+</head>
+<body>
+    <h1>Select dataset</h1>
+    {% for set in datasets %}
+        <a href="/{{ set }}">{{ set }}</a>
+        <br>
+    {% endfor %}
+</body>
+</html>

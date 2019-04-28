@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{set}}</title>
+</head>
+<body> 
+    <H1>{{set}}</H1>
+    <table border=1>
+        <tr>
+            <th>Layer </th>
+            <th>Head </th>
+            <th>Metric </th>
+        </tr>
+        {% for metric in metrics %}
+        <tr>
+            <td>{{ metric[2] }}</td>
+            <td>{{ metric[3] }}</td>
+            <td>{{ metric[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
