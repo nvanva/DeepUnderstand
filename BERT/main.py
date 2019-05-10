@@ -70,11 +70,6 @@ def create_graph_page(output):
             fold_count = -1
             data_size = -1
 
-    train_class_distr = ''
-    test_class_distr = ''
-    for label, count in class_sizes:
-        train_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.9)) + ' '
-        test_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.1)) + ' '
 
     metric_names = ['Logistic regression accuracy', 'Logistic regression min', 'Clustering v-measure', 'Average distance ratio', 'Logistic regression train score']
     xs = []
@@ -159,6 +154,11 @@ def create_graph_page(output):
 
 
     c_score_plot = figure(title='Regularisation parameter cv scores', plot_width=800, plot_height=600, toolbar_location=None, x_axis_type='log')
+    train_class_distr = ''
+    test_class_distr = ''
+    for label, count in class_sizes:
+        train_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.9)) + ' '
+        test_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.1)) + ' '
     c_score_plot.xaxis.axis_label = 'Regularisation parameter'
     c_score_plot.yaxis.axis_label = 'Avg CV score'
     c_s_p_legend_data = []
