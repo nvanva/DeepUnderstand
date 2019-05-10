@@ -10,10 +10,20 @@ import csv
 
 def eval_sentiment(input_file, bert, layers, run=True):
     labels = []
+
+    line_count = 0
+    with open(input_file, 'r') as f:
+        for line in f:
+            line_count += 1
+    random_sample_idx = np.random.choice(line_count, 2)
+    random_sample = []
+
     with open(input_file, 'r') as f:
         with open('texts', 'w') as dest:
             reader = csv.reader(f)
             for i, row in enumerate(reader):
+                if i in random_sample_idx:
+                    random_sample.append(row)
                 # if i == 52:
                 #     break
                 labels.append(int(row[0]))
@@ -68,11 +78,12 @@ def eval_sentiment(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[3], cls_metric[4], idx))
-    return metrics
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+    unique, counts = np.unique(labels, return_counts=True)
+    return metrics, 15, len(labels), random_sample, list(zip(unique, counts)), 
 
 def eval_pos(input_file, bert, layers, run=True):
-    data = np.load(input_file)
+    data = np.load(input_file, allow_pickle=True)
     with open('sentences', 'w') as f:
         for text in data:
                 string = ''
@@ -111,6 +122,7 @@ def eval_pos(input_file, bert, layers, run=True):
 
 
     pos_to_idx = {}
+    idx_to_pos = {}
     max_label = 0
     correct = []
     for text in data:
@@ -118,6 +130,7 @@ def eval_pos(input_file, bert, layers, run=True):
         for word in text:
             if word[1] not in pos_to_idx:
                 pos_to_idx[word[1]] = max_label
+                idx_to_pos[max_label] = word[1]
                 max_label += 1
             labels.append(pos_to_idx[word[1]])
         correct.append(labels)
@@ -169,11 +182,16 @@ def eval_pos(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[3], cls_metric[4], idx))
-    return metrics
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+    
+    unique1, counts = np.unique(np.concatenate(correct), return_counts=True)
+    unique = []
+    for x in unique1:
+        unique.append(idx_to_pos[x])
+    return metrics, 10, np.sum(list(map(len, data))), np.random.choice(data, 1), list(zip(unique, counts))
 
 def eval_wsi(input_file, bert, layers, run=True):
-    data = np.load(input_file)#[:10]
+    data = np.load(input_file, allow_pickle=True)#[:10]
     data = [(ex[0], int(ex[1]), int(ex[2])) for ex in data]
 
     with open('texts', 'w') as f:
@@ -246,11 +264,12 @@ def eval_wsi(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[3], cls_metric[4], idx))
-    return metrics
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+    unique, counts = np.unique(labels, return_counts=True)
+    return metrics, 15, len(data), data[:2], list(zip(unique, counts))
 
 def eval_anaphora(input_file, bert, layers, run=True):
-    data = np.load(input_file)# [:1] # array of lists [text, target_word_idx, correct_word_idx]
+    data = np.load(input_file, allow_pickle=True)# [:1] # array of lists [text, target_word_idx, correct_word_idx]
     with open('100_texts', 'w') as f:
         for example in data:
             f.write(example[0])

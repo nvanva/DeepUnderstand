@@ -18,6 +18,25 @@
     </head>
     <body>
         <h1>{{ set }}</h1>
+        {% for line in description %}
+        {{ line }}<br>
+        {% endfor %}
+
+        <h3>Train set size: {{ size }} ({{ train_class_distr }})</h3>
+        <h3>Test set size {{ test_size }} ({{ test_class_distr }})</h3>
+        <h3>Cross validation fold count: {{ folds }}</h3>
+
+        <h3>Sample from dataset:</h3>
+        <table border=1>
+            {% for row in rows %}
+                <tr>
+                    {% for elem in row %}
+                        <td>{{ elem }}</td>
+                        {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        
         {{ layout_div|safe }}
     </body>
 </HTML>
