@@ -401,7 +401,10 @@ def main(_):
                                                "w")) as writer:
     text_tokens = []
     results = {}
+    batch_idx = 0
+    text_idx = 0
     for result in estimator.predict(input_fn, yield_single_examples=True):
+      text_idx += 1
       print(result['layer_output_0'].shape)
       unique_id = int(result["unique_id"])
       feature = unique_id_to_feature[unique_id]
@@ -420,14 +423,22 @@ def main(_):
         else:
           results[layer_index].append(result['layer_output_' + str(j)][:len(feature.tokens),:])
           # np.save(FLAGS.output_file + '_layer_' + str(layer_index), )
+      if text_idx % 400 == 0:
+        for layer_index, value in results.items():
+          if len(value) > 1:
+            np.savez('layer_outputs/' + FLAGS.output_file + '_layer_' + str(layer_index) + '_' + str(batch_idx), *value)
+          else:
+            np.save('layer_outputs/' + FLAGS.output_file + '_layer_' + str(layer_index) + '_' + str(batch_idx), value[0])
+        batch_idx += 1
+        results = {}
     with open('tokens.txt', 'w') as f:
       for tok_str in text_tokens:
           f.write(tok_str + '\n')
     for layer_index, value in results.items():
       if len(value) > 1:
-        np.savez(FLAGS.output_file + '_layer_' + str(layer_index), *value)
+        np.savez('layer_outputs/' + FLAGS.output_file + '_layer_' + str(layer_index) + '_' + str(batch_idx), *value)
       else:
-        np.save(FLAGS.output_file + '_layer_' + str(layer_index), value[0])
+        np.save('layer_outputs/' + FLAGS.output_file + '_layer_' + str(layer_index) + '_' + str(batch_idx), value[0])
 
 
       # output_json = collections.OrderedDict()

@@ -141,7 +141,13 @@ def create_graph_page(output):
     """
 
     for idx, name in enumerate(metric_names):
-        plots.append(figure(title=name, plot_width=600, plot_height=600, toolbar_location=None))
+        if name == 'Logistic regression accuracy':
+            t_name = 'Logistic regression test accuracy'
+        elif name == 'Logistic regression train score':
+            t_name = 'Logistic regression train accuracy'
+        else:
+            t_name = name
+        plots.append(figure(title=t_name, plot_width=600, plot_height=600, toolbar_location=None))
         xs.append([metric[-1] + 1 for metric in metrics])
         ys.append([metric[1 + idx] for metric in metrics])
         sources.append(ColumnDataSource(dict(x=xs[-1], top=ys[-1])))
@@ -153,14 +159,14 @@ def create_graph_page(output):
         sorters[-1].callback = CustomJS(args=dict(metrics=metrics, idx=idx, sorter=sorters[-1], source=sources[-1], xs=xs[::-1], ys=ys, metric_names=metric_names, xaxis=plots[-1].xaxis), code=callback_code)
 
 
-    c_score_plot = figure(title='Regularisation parameter cv scores', plot_width=800, plot_height=600, toolbar_location=None, x_axis_type='log')
+    c_score_plot = figure(title='Train accuracy vs regularisation parameter', plot_width=800, plot_height=600, toolbar_location=None, x_axis_type='log')
     train_class_distr = ''
     test_class_distr = ''
     for label, count in class_sizes:
         train_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.9)) + ' '
         test_class_distr += 'class ' + str(label) + ': ' + str(int(count * 0.1)) + ' '
     c_score_plot.xaxis.axis_label = 'Regularisation parameter'
-    c_score_plot.yaxis.axis_label = 'Avg CV score'
+    c_score_plot.yaxis.axis_label = 'Accuracy'
     c_s_p_legend_data = []
     colors = ['red', 'orange', 'green', 'blue', 'purple', 'black', 'olive', 'cyan', 'magenta', 'teal', 'grey', 'pink']
     for idx, metric in enumerate(metrics):
@@ -176,18 +182,41 @@ def create_graph_page(output):
     c_score_plot.add_layout(c_s_p_legend, 'right')
 
 
+    c_score_plot_test = figure(title='Test accuracy vs regularisation parameter', plot_width=800, plot_height=600, toolbar_location=None, x_axis_type='log')
+    c_score_plot_test.xaxis.axis_label = 'Regularisation parameter'
+    c_score_plot_test.yaxis.axis_label = 'Accuracy'
+    c_s_p_legend_data_test = []
+    for idx, metric in enumerate(metrics):
+        tmp = list(map(list, zip(*metric[-5])))
+        cs = tmp[0]
+        cv_scores = tmp[1]
+        if idx >= 12:
+            c_s_p_legend_data_test.append(('Layer' + str(idx+1), [c_score_plot_test.square(cs, cv_scores, size=8, color=colors[idx])]))
+        else:
+            c_s_p_legend_data_test.append(('Layer' + str(idx+1), [c_score_plot_test.circle(cs, cv_scores, size=8, color=colors[idx])]))
+        c_score_plot_test.line(cs, cv_scores, color=colors[idx])
+    c_s_p_legend_test = Legend(items=c_s_p_legend_data_test)
+    c_score_plot_test.add_layout(c_s_p_legend_test, 'right')
 
-    interval_plot = figure(title='Logistic regression cross validation scores', plot_width=600, plot_height=600, toolbar_location=None)
+
+    interval_plot = figure(title='Logistic regression CV accuracy', plot_width=600, plot_height=600, toolbar_location=None)
     lows = [metric[-2][0] for metric in metrics]
     highs = [metric[-2][1] for metric in metrics]
     lows1 = [metric[-3][0] for metric in metrics]
     highs1 = [metric[-3][1] for metric in metrics]
+    points = []
+    p_x_vals = []
+    for idx, metric in enumerate(metrics):
+        points = np.concatenate((points, metric[-6]))
+        p_x_vals += [idx + 1 for _ in range(len(metric[-6]))]
     x_vals = [i + 1 for i in range(len(lows))]
     interval_plot.vbar(x_vals, 0.3, highs1, lows1, line_color='blue')
     interval_plot.segment(x_vals, lows, x_vals, highs, line_color='black', line_width=2)
     interval_plot.rect(x_vals, lows, 0.2, 0.0001, line_color='black')
     interval_plot.rect(x_vals, highs, 0.2, 0.0001, line_color='black')
+    interval_plot.circle(p_x_vals, points, color='red', size=10)
     interval_plot.xaxis.ticker = x_vals
+
 
 
     avg_dist_div = Div(text="""Отношение среднего расстояния между элементами одного класса к среднему расстоянию между элементами разных. <br> 
@@ -208,9 +237,19 @@ def create_graph_page(output):
                             Синий прямоугольник - 80% результатов, черная линия - 100% результатов.""")
 
     layout_list = [[sorter_div[i], plots[i]] for i in range(len(plots))]
-    layout_list[0].append(interval_plot)
-    layout_list[0].append(interval_div)
+    layout_list = []
+    for i in range(len(plots)):
+        if i == 0:
+            layout_list.append([sorter_div[i], plots[i]])
+        elif i == 1:
+            layout_list.append([sorter_div[-1], plots[-1]])
+        else:
+            layout_list.append([sorter_div[i-1], plots[i-1]])
+
+    layout_list[2].append(interval_plot)
+    layout_list[2].append(interval_div)
     layout_list[1].append(c_score_plot)
+    layout_list[0].append(c_score_plot_test)
     l = layout(layout_list, sizing_mode='fixed')
 
     script, div = components(l)

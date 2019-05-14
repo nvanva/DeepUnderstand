@@ -77,7 +77,7 @@ def cluster_metrics(vectors, y=None, input_type=0):
 
 # vectors = list of arrays shape (num_vectors_in_class, vector_len) with length num_classes 
 # input_type = 1 => vectors = array (num_vectors, vector_len), y = array (num_vectors) of labels
-def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=0, validate=False, val_fraction=0.85, fold_count=15):
+def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=0, validate=False, val_fraction=0.9, fold_count=15):
     if input_type == 0:
         X = vectors[0]
         y = np.zeros(len(vectors[0])) # len(x) == x.shape[0] if x is np.array
@@ -112,14 +112,18 @@ def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=
         X = X[:sep]
         y = y[:sep]
 
+
     cross_val_scores = []
     avg_val_score = []
+    val_scores = []
     C_options = [0.01, 0.03, 0.1, 0.3, 1, 3]
     for C in C_options:
         clf = LogisticRegression(max_iter=500, C=C)
         scores = cross_val_score(clf, X, y, cv=fold_count)
         cross_val_scores.append(scores)
         avg_val_score.append(np.average(scores))
+        clf.fit(X, y)
+        val_scores.append(clf.score(val_X, val_y))
         # avg_val_score.append(clf.score(val_X, val_y))
 
     C = 0.01
@@ -130,6 +134,8 @@ def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=
         scores = cross_val_score(clf, X, y, cv=fold_count)
         cross_val_scores.insert(0, scores)
         avg_val_score.insert(0, np.average(scores))
+        clf.fit(X, y)
+        val_scores.insert(0, clf.score(val_X, val_y))
 
     C = 3
     while np.argmax(avg_val_score) == len(avg_val_score) - 1:
@@ -139,6 +145,8 @@ def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=
         scores = cross_val_score(clf, X, y, cv=fold_count)
         cross_val_scores.append(scores)
         avg_val_score.append(np.average(scores))
+        clf.fit(X, y)
+        val_scores.append(clf.score(val_X, val_y))
 
     best_avg_score_idx = np.argmax(avg_val_score)
     best_scores = np.sort(cross_val_scores[best_avg_score_idx])
@@ -149,11 +157,12 @@ def classifier_metric(vectors, y=None, val_vectors=None, val_y=None, input_type=
     total_interval = [min_score, max_score]
 
     C_scores = [(C, score) for score, C in zip(avg_val_score, C_options)]
+    C_scores_test = [(C, score) for score, C in zip(val_scores, C_options)]
 
     best_clf = LogisticRegression(max_iter=500, C=C_options[best_avg_score_idx]).fit(X,y)
     train_score = best_clf.score(X,y)
 
-    return avg_val_score[best_avg_score_idx], min_score, C_scores, conf_interval, total_interval, train_score
+    return avg_val_score[best_avg_score_idx], min_score, C_scores, conf_interval, total_interval, train_score, C_scores_test, best_scores
 
 # vectors = list of arrays shape (num_vectors_in_class, vector_len) with length num_classes 
 def distance_metrics(vectors, metric='cosine'):
