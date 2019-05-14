@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select dataset</title>
+</head>
+<body>
+    <h1>Select dataset</h1>
+    {% for set in datasets %}
+        <a href="/{{ set[0] }}">{{ set[0] }}</a> <br>
+        {% for line in set[2] %} {{ line }} <br> {% endfor %}
+        dataset size: {{set[1]}} <br>
+        <table border=1>
+        {% for class in set[3] %}
+            <tr>
+                {% for elem in class %}
+                <td>{{ elem }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+        <br><br><br>
+    {% endfor %}
+</body>
+</html>
