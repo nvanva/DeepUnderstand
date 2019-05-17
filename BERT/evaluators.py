@@ -8,6 +8,76 @@ from supervised_pca import SupervisedPCARegressor
 from metrics import *
 import csv
 
+def eval_sentiment_big(input_file, bert, layers, run=True, batch_size=400):
+    labels = []
+    line_count = 0
+    with open(input_file, 'r') as f:
+        for line in f:
+            line_count += 1
+    random_sample_idx = np.random.choice(line_count, 2)
+    random_sample = []
+
+    with open(input_file, 'r') as f:
+        with open('texts', 'w') as dest:
+            reader = csv.reader(f)
+            for i, row in enumerate(reader):
+                if i in random_sample_idx:
+                    random_sample.append(row)
+                # if i == 52:
+                #     break
+                labels.append(int(row[0]))
+                dest.write(row[1] + '\n')
+
+
+    if run:
+        args = ['python', 'bert/extract_features.py']
+        args.append('--input_file=texts')
+        args.append('--output_file=sentiment')
+        args.append('--vocab_file=' + bert + 'vocab.txt')
+        args.append('--bert_config_file=' + bert + 'bert_config.json')
+        args.append('--init_checkpoint=' + bert + 'bert_model.ckpt')
+        args.append('--layers=' + layers)
+        args.append('--max_seq_length=128')
+        args.append('--batch_size=8')
+        args.append('--do_lower_case=False')
+        args.append('--attention=False')
+        args.append('--mask_underscore=False')
+        subprocess.run(args)
+
+    layer_cls_metrics = []
+    layer_v_metrics = []
+    layer_avg_dist_metrics = []
+    for layer in range(len(layers.split(','))):
+        outputs = []
+        for batch in range(1000):
+            try:
+                layer_outputs = np.load('layer_outputs/sentiment_layer_' + str(layer) + '_' + str(batch) + '.npz')
+                try:
+                    outputs += [layer_outputs['arr_' + str(x)][0] for x in range(batch_size)]
+                except:
+                    outputs += [layer_outputs['arr_' + str(x)][0] for x in range(len(labels) % batch_size)]
+            except:
+                break
+        
+        outputs = np.array(outputs)
+        pca_outputs = outputs
+
+        class_vectors = [[], []]
+        for idx, label in enumerate(labels):
+            class_vectors[label].append(pca_outputs[idx])
+
+        layer_cls_metrics.append(classifier_metric(outputs, labels, input_type=1, validate=True))
+        layer_v_metrics.append(cluster_metrics(pca_outputs, labels, input_type=1)[2])
+        layer_avg_dist_metrics.append(distance_metrics(class_vectors))
+
+
+    metrics = []
+    for idx, cls_metric in enumerate(layer_cls_metrics):
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[7], cls_metric[6], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+    unique, counts = np.unique(labels, return_counts=True)
+    return metrics, 15, len(labels), random_sample, list(zip(unique, counts))
+
+
 def eval_sentiment(input_file, bert, layers, run=True):
     labels = []
 
@@ -78,9 +148,9 @@ def eval_sentiment(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[7], cls_metric[6], cls_metric[2], cls_metric[3], cls_metric[4], idx))
     unique, counts = np.unique(labels, return_counts=True)
-    return metrics, 15, len(labels), random_sample, list(zip(unique, counts)), 
+    return metrics, 15, len(labels), random_sample, list(zip(unique, counts))
 
 def eval_pos(input_file, bert, layers, run=True):
     data = np.load(input_file, allow_pickle=True)
@@ -182,7 +252,7 @@ def eval_pos(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[7], cls_metric[6], cls_metric[2], cls_metric[3], cls_metric[4], idx))
     
     unique1, counts = np.unique(np.concatenate(correct), return_counts=True)
     unique = []
@@ -264,7 +334,7 @@ def eval_wsi(input_file, bert, layers, run=True):
 
     metrics = []
     for idx, cls_metric in enumerate(layer_cls_metrics):
-        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[2], cls_metric[3], cls_metric[4], idx))
+        metrics.append((f'Layer {idx + 1} : avg_clas_score {cls_metric[0]}, min_val_score {cls_metric[1]}, v_measure {layer_v_metrics[idx]}, average_distance between classes {layer_avg_dist_metrics[idx]}, conf_interval {cls_metric[3]}', cls_metric[0], cls_metric[1], layer_v_metrics[idx], layer_avg_dist_metrics[idx], cls_metric[5], cls_metric[7], cls_metric[6], cls_metric[2], cls_metric[3], cls_metric[4], idx))
     unique, counts = np.unique(labels, return_counts=True)
     return metrics, 15, len(data), data[:2], list(zip(unique, counts))
 

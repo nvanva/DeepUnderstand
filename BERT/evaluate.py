@@ -28,6 +28,12 @@ if data_type == 'sentiment':
     # for sample in random_sample:
     #     rows.append(sample)
     rows += random_sample
+elif data_type == 'sentiment_b':
+    metrics, fold_count, data_size, random_sample, class_sizes = eval_sentiment_big(input_file, bert, layers)
+    rows = [['class', 'text']]
+    # for sample in random_sample:
+    #     rows.append(sample)
+    rows += random_sample
 elif data_type == 'pos':
     metrics, fold_count, data_size, random_sample, class_sizes = eval_pos(input_file, bert, layers)
     rows = [['word'], ['tag']]
